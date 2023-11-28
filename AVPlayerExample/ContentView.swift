@@ -62,6 +62,28 @@ struct ContentView: View {
             Spacer()
         }
         .padding()
+        .onReceive(NotificationCenter.default.publisher(for: AVPlayer.didInitPlayerNotification)) { _ in
+            print("!: did create new player notification")
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                vm.next?.insert(AVPlayerItem(url: MediaAssets.first), after: nil)
+            }
+            if AVAudioSession.sharedInstance()
+                .currentRoute
+                .outputs
+                .contains(where: { $0.portType == .airPlay })
+            {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    vm.player.seek(
+                        to: vm.player.currentTime(),
+                        toleranceBefore: .zero,
+                        toleranceAfter: .zero
+                    )
+
+                    print("!: did toggle player")
+                }
+            }
+        }
     }
 }
 
